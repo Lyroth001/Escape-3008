@@ -3,7 +3,7 @@ Created by Zac.D for AQA A-Level computer science
 How to start:
 
 ```
-	Run --------.py
+Run --------.py
 ```
 
 ## To Build for Distribution:
