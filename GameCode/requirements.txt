@@ -1,0 +1,4 @@
+pygame==2.1.2
+pygame-menu==4.2.8
+pyinstaller==5.9.0
+pyinstaller-hooks-contrib==2023.1

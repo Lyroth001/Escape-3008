@@ -247,7 +247,7 @@ if __name__=="__main__":
     screen = display.set_mode(size)
     path=os.path.dirname(__file__)
     stationPath=path+"\\Assets\\SpaceStationTileset.png"
-    testButton=button("ABC123","C:\\Users\\zac\\OneDrive\\Documents\\Code\\Escape 3008\\GameCode\\Assets\\UI elements\\RetroWindowsGUI\\Windows_Button.png",5,500,100,(20,80))
+    testButton=button("ABC123","C:\\Users\\zac\\OneDrive\\Documents\\Code\\Escape 3008\\GameCode\\Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png",5,500,100,(20,80))
     toAdd=testButton.makeButton()
     screen.blit(toAdd,(50,50))
     #NOTE-Will not work until paths changed to tilemap
