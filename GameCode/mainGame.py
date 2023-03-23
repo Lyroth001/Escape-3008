@@ -94,7 +94,7 @@ class Escape3008:
                             i.onClick(self)
                 elif event.key==pygame.K_ESCAPE:
                     self._running = False
-                    self.mainMenu = False
+                    self.inMainMenu = False
                     pygame.quit()
             except:
                 print("Please generate a map by pressing space before attempting to move")
@@ -252,7 +252,7 @@ class Escape3008:
                 toRemoveEnemy.append(x)        
             if sprite.collide_rect(self.player,x) == True:
                 x.doDamage(self.player)
-                print(self.player.hp)
+                toRemoveEnemy.append(x)
         #move and check colls for player bullets
         for x in self.playerBullets.sprites():
             x.takeTurn()
@@ -264,13 +264,6 @@ class Escape3008:
             print(collisions)
             x.doDamage(collisions[x][0])
             print("damaged")
-
-      #              if y.isFriendly == 0:
-       #                 print("player")
-        #                if self.player.checkCol(y.coords):
-         #                   print("Ouch")
-          #                  self.player.takeDamage(y.dmg)
-           #                 print(player.hp)
     
         #deletes and adds bullets to sprite groups as necessary
         for x in toRemoveEnemy:
@@ -371,7 +364,7 @@ class Escape3008:
         pass
     
     def __loadImages(self):
-        buttonPath=self.path+"\\Assets\\UI elements\\RetroWindowsGUI\\Windows_Button.png"
+        buttonPath=self.path+"\\Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png"
         self.startButton=startButton("To start, press space",buttonPath,5,200,25,self.startButtonLoc).makeButton()
 
 if __name__ == "__main__":
