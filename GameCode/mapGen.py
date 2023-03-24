@@ -1,4 +1,5 @@
 import random
+import items
 from enemy import *
 from bosses import *
 class Room:
@@ -131,9 +132,12 @@ class TreasureRoom(SymbolRoom):
     def update(self,n,s,e,w,p,name,item,symbol):
         super().update(n,s,e,w,p,name,symbol)
         self.item=item
-        
-    def __assignItem(self):
-        pass
+
+    def getTreasure(self):
+        return(self.item)    
+
+    def setItem(self,item):
+        self.item=item
     
 class BossRoom(SymbolRoom):
     def __init__(self,n,s,e,w,p,name,boss,symbol):
@@ -152,8 +156,15 @@ class BossRoom(SymbolRoom):
         return self.boss
     
 class Level:
-    def __init__(self,rows,enemies = None):
+    def __init__(self,rows,tier=0):
         self.rows=rows
+        self.tier=tier
+
+    def setTier(self,tier):
+        self.tier=tier
+
+    def getTier(self):
+        return(self.tier)
 
     def debugGetContentsAsList(self):
         for x in range(0,len(self.rows)):
@@ -199,7 +210,7 @@ class Level:
         if currentRoom.isClear() == False:
             if currentRoom.getType() == "Treasure room":
                 #spawn item
-                pass
+                currentRoom.setItem(items.assignItem(player,self.tier))
             elif currentRoom.getType() == "Boss":
                 #spawn boss
                 pass
@@ -247,11 +258,12 @@ class Row:
 
 
 class BuildFloorInterface:
-    def __init__(self,x,y,rooms,seed=None):
+    def __init__(self,x,y,rooms,tier,seed=None):
         if seed is None:
             seed = random.randint(0,9999999999999999)
         print(f"seed = {seed}")
         random.seed(seed)
+        self.tier=tier
         self.numRooms=x
         self.numRows=y
         self.maxRooms=rooms
@@ -452,6 +464,7 @@ class BuildFloorInterface:
         print("Generating Bits")
         level=self.__generateBits(level)
         print("Returning...")
+        level.setTier(self.tier)
         return level
 
     def __placeTreasureRoom(self, level):

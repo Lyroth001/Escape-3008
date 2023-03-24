@@ -3,8 +3,8 @@
 #Main game module, creates window and handles userinputs, holds main game loop
 #I will load all possible rooms immediatly, and then generate a hash value for each possible room
 #to determine where in a dictionary or smthng they should be accessed
-#Debugging SEW rooms using 3316059216095122 seed
 #check seed 65533925843339
+#seed with item room by spawn 9046123406124146
 
 import pygame
 import os
@@ -41,6 +41,7 @@ class Escape3008:
         self.enemies=pygame.sprite.Group()
         self.enemyBullets=pygame.sprite.Group()
         self.playerBullets=pygame.sprite.Group()
+        self.items=pygame.sprite.Group()
         self.maxEnemyBullets=67
         self.numBullets = 0
 
@@ -81,9 +82,7 @@ class Escape3008:
                     print("Command-Movedown")
                 elif event.key==pygame.K_a:
                     self.playerLoc=self.level.movePlayer([-1,0],self.playerLoc)
-                    print("Command-Moveleft")
-                elif event.key==pygame.K_LEFTBRACKET:
-                    print("Command-LeftBracket")                    
+                    print("Command-Moveleft")                  
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     loc=pygame.mouse.get_pos()
                     print("CheckingColls")
@@ -148,6 +147,9 @@ class Escape3008:
         if key[K_q]:
             print(self.player.getLocation())
             self.level.visualiseLevel()
+        if key[K_LEFTBRACKET]:
+                print("Command-LeftBracket")  
+                self.clearGroups()
         if key[K_e]:
             if len(self.enemies)==0:
                 currentRoomBits=self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()
@@ -264,6 +266,9 @@ class Escape3008:
             print(collisions)
             x.doDamage(collisions[x][0])
             print("damaged")
+        if len(self.items) > 0:
+            for x in self.items.sprites():
+                x.itemIdle(self.surface)
     
         #deletes and adds bullets to sprite groups as necessary
         for x in toRemoveEnemy:
@@ -295,16 +300,27 @@ class Escape3008:
     def addEnemies(self,entities):
         for entity in entities:
             self.enemies.add(entity)
+    
+    def addItem(self,item):
+        self.items.add(item)
 
-    def getRoomContents(self,room,player):
+    def getRoomContents(self,roomCoords,player):
         contents=None
-        if self.level.rows[1].rooms[0].getType() != "Start":
-            self.level.loadRoomContents(room,player)
-            print(self.level.rows[1].rooms[0].getType())
-            if self.level.rows[1].rooms[0].getType() == "Standard":
-                contents = self.level.rows[room[1]].rooms[room[0]].getEnemies()
-            if contents != None:
-                self.addEnemies(contents)
+        room=self.level.rows[roomCoords[1]].rooms[roomCoords[0]]
+        type=room.getType()
+        if type != "Start":
+            self.level.loadRoomContents(roomCoords,player)
+            print(type)
+            if type.lower() == "standard":
+                contents = room.getEnemies()
+                if contents != None:
+                    self.addEnemies(contents)
+            elif type.lower() =="treasure room":
+                contents = room.getTreasure()
+                if contents != None:
+                    self.addItem(contents)
+            elif type.lower() =="boss room":
+                pass
 
     def mainGame(self):
         self.surface.blit(self.possibleRooms[self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()],(0,0))
@@ -342,7 +358,7 @@ class Escape3008:
         self.__on_cleanup()
         
     def __loadLevel(self,seed):
-        self.level=BuildLevel1(6,6,13,seed,self.surface,self.enemies,self.enemyBullets).getLevel()
+        self.level=BuildLevel1(6,6,13,seed,1,self.surface,self.enemies,self.enemyBullets).getLevel()
         self.playerLoc=self.level.getStart()
         self.level.visualiseLevel()
         self.__loadRoomImgs()

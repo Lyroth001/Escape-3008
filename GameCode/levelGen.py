@@ -3,11 +3,11 @@
 from enemy import *
 from mapGen import *
 class BuildLevel1(BuildFloorInterface):
-    def __init__(self,x,y,rooms,seed,screen,enemyGroup,bulletGroup):
+    def __init__(self,x,y,rooms,seed,tier,screen,enemyGroup,bulletGroup):
         self.screen = screen
         self.enemyGroup=enemyGroup
         self.bulletGroup=bulletGroup
-        super().__init__(x,y,rooms,seed)
+        super().__init__(x,y,rooms,tier,seed)
         self.__addEnemies()
         
     def __addEnemies(self):
