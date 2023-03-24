@@ -38,3 +38,7 @@ Assets:
 
 SCP articles:
 	SCP-3008 by Mortos
+
+Modules and tools that were used in development:
+	Exe file built using pyinstaller
+	Game built using pygame
