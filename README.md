@@ -13,10 +13,6 @@ FIRST TIME ONLY:
 pyinstaller --onefile .\mainGame.py --add-data '.\Assets\Environments;Assets/Environments' --add-data '.\Assets\UI_elements\RetroWindowsGUI;Assets/UI_elements/RetroWindowsGui' --windowed
 ```
 
-Then edit `GameCode\mainGame.spec`:  
-Change the empty array `datas` to 
-`datas = [('Assets/UI_elements/RetroWindowsGUI/*','Assets/UI_elements/RetroWindowsGUI'), ('Assets/Environments/*', 'Assets/Environments')]`
-
 To rebuild call:
 ```
 pyinstaller mainGame.spec
