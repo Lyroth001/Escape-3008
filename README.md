@@ -10,7 +10,7 @@ Run --------.py
 
 FIRST TIME ONLY: 
 ```
-pyinstaller --onefile .\mainGame.py --collect-data Assets\\Environments --collect-data Assets\\UI_elements\\RetroWindowsGUI --windowed
+pyinstaller --onefile .\mainGame.py --add-data '.\Assets\Environments;Assets/Environments' --add-data '.\Assets\UI_elements\RetroWindowsGUI;Assets/UI_elements/RetroWindowsGui' --windowed
 ```
 
 Then edit `GameCode\mainGame.spec`:  
