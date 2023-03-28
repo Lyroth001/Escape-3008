@@ -27,13 +27,13 @@ class enemy(sprite.Sprite):
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
     
     def locatePlayer(self):
-        return(self.player.getLocation())
+        return self.player.getLocation()
     
     def takeDamage(self,damage):
         self.hp -= damage
 
     def getType(self):
-        return("enemy")
+        return "enemy"
 
     def takeTurn(self):
         toTake = random.randint(self.movops[0],self.movops[1])
@@ -58,7 +58,7 @@ class enemy(sprite.Sprite):
         self.move(dirc)
         self.rect.topleft=(self.loc[0],self.loc[1])
         if dirc != [0,0]:
-            return(self.attack(dirc))
+            return self.attack(dirc)
 
     def attack(self,dirc):
         if self.atktimer == self.atkspd:

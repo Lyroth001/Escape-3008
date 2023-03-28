@@ -68,7 +68,7 @@ class drawRoom():
         self.screen.blit(self.bottomWallImg,(self.width/2,self.height-self.tileSize))
         #floor
         self.screen.blit(self.floorImg1,(self.width/2,self.height/2))
-        return(self.screen)
+        return self.screen
 
     def generateImage(self):
         currentLoc=[0,0]
@@ -120,7 +120,7 @@ class drawRoom():
                 currentLoc[0]=0
                 currentLoc[1]+=self.tileSize
         self.placeDoorways()
-        return(self.screen)
+        return self.screen
     
     def placeDoorways(self):
         if self.bits & 0b0001 == 0b0001:
@@ -163,11 +163,11 @@ class button():
             else:
                 currentLoc[0]=0
                 currentLoc[1]+=self.tileSize
-        return(rects)
+        return rects
 
     def getImgs(self):
         rects=self.generateRects()
-        return(self.img.getTiles(rects))
+        return self.img.getTiles(rects)
 
     def makeButton(self):
         currentLoc=[0,0]
@@ -200,7 +200,7 @@ class button():
                 currentLoc[1]+=self.tileSize
         buttonText=text(self.text,self.font,(0,0,0),(0,0),self.button)
         print("Made button")
-        return(self.button)
+        return self.button
     
     def checkCollision(self, location):
         pass
@@ -234,13 +234,13 @@ class tilemap:
         toGet=Rect(rectX,rectY,self.size,self.size)
         imgToReturn=Surface(toGet.size).convert()
         imgToReturn.blit(self.img,(0,0),toGet)
-        return(imgToReturn)
+        return imgToReturn
     
     def getTiles(self,rects):
         imgs=[]
         for x in range(len(rects)):
             imgs.append(self.getTile(rects[x][0],rects[x][1]))
-        return(imgs)
+        return imgs
 
 if __name__=="__main__":
     size=(1024,640)

@@ -8,6 +8,7 @@
 
 import pygame
 import os
+import sys
 from pygame.locals import * 
 from levelGen import *
 from classes import *
@@ -46,7 +47,7 @@ class Escape3008:
         self.numBullets = 0
 
         self.font=pygame.font.SysFont("comicsans",30)
-        self.startButtonLoc=(50,200)
+        self.startButtonLoc=(50,240)
         print("running")
 
     def __on_init(self):
@@ -58,8 +59,8 @@ class Escape3008:
         self._running=True
 
     def getScreen(self):
-        return(self.surface)
-
+        return self.surface
+    
     def __on_event_menu(self, event):
         if event.type == pygame.QUIT:
             self._running = False
@@ -71,32 +72,12 @@ class Escape3008:
                     self.__loadLevel(seed)
                     self.inMainMenu=False
                     self.inMainGame=True
-                elif event.key==pygame.K_w:
-                    self.playerLoc=self.level.movePlayer([0,-1],self.playerLoc)
-                    print("Command-Moveup")
-                elif event.key==pygame.K_d:
-                    self.playerLoc=self.level.movePlayer([1,0],self.playerLoc)
-                    print("Command-Moveright")
-                elif event.key==pygame.K_s:
-                    self.playerLoc=self.level.movePlayer([0,1],self.playerLoc)
-                    print("Command-Movedown")
-                elif event.key==pygame.K_a:
-                    self.playerLoc=self.level.movePlayer([-1,0],self.playerLoc)
-                    print("Command-Moveleft")                  
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    loc=pygame.mouse.get_pos()
-                    print("CheckingColls")
-                    print(loc)
-                    for i in self.buttons:
-                        collision=i.checkCollision(loc)
-                        if collision == True:
-                            i.onClick(self)
                 elif event.key==pygame.K_ESCAPE:
                     self._running = False
                     self.inMainMenu = False
                     pygame.quit()
             except:
-                print("Please generate a map by pressing space before attempting to move")
+                print("")
                     
     def __on_event_game(self, event):
         if event.type == pygame.QUIT:
@@ -202,6 +183,7 @@ class Escape3008:
         self.enemies.empty()
         self.enemyBullets.empty()
         self.playerBullets.empty()
+        self.items.empty()
 
     def __on_cleanup(self):
         pygame.quit()
@@ -211,6 +193,11 @@ class Escape3008:
         self.surface.fill((52,78,91))
         self.surface.blit(self.startButton,self.startButtonLoc)
         self.buttons.append(self.startButton)
+        text("Welcome to Escape 3008!",self.font,(255,255,255),(50,80),self.surface)
+        text("Use WASD to move around.",self.font,(255,255,255),(50,110),self.surface)
+        text("Use arrow keys to attack.",self.font,(255,255,255),(50,140),self.surface)
+        text("Use E to interact with objects (doors and items).",self.font,(255,255,255),(50,170),self.surface)
+        text("Press Esc to quit.",self.font,(255,255,255),(50,200),self.surface)
         pygame.display.flip()
 
     def getSeedMenu(self):
@@ -232,8 +219,8 @@ class Escape3008:
                         returning = True
             pygame.display.flip()
         if seedInput == "":
-            return(None)
-        return(int(seedInput))
+            return None
+        return int(seedInput)
 
     def mainGameInitialise(self):
         self.player = player(2,10,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
@@ -241,6 +228,7 @@ class Escape3008:
     def gameTurn(self):
         toRemovePlayer=[]
         toRemoveEnemy=[]
+        toRemoveItem=[]
         toAdd=[]
         #move and attack for each enemy
         for x in self.enemies.sprites():
@@ -269,18 +257,23 @@ class Escape3008:
         if len(self.items) > 0:
             for x in self.items.sprites():
                 x.itemIdle(self.surface)
+                if sprite.collide_rect(self.player,x) == True:
+                    x.onPickup()
+                    toRemoveItem.append(x)
     
         #deletes and adds bullets to sprite groups as necessary
         for x in toRemoveEnemy:
             self.enemyBullets.remove(x)   
         for x in toRemovePlayer:
             self.playerBullets.remove(x)
+        for x in toRemoveItem:
+            self.items.remove(x)
         for x in toAdd:
             self.addEnemyBullet(x)
 
         #checks for dead player and enemies
         if self.player.hp<=0:
-            return(True)
+            return True
         deadEnemies=[]
         for x in self.enemies:
             if x.hp<=0:
@@ -325,18 +318,13 @@ class Escape3008:
     def mainGame(self):
         self.surface.blit(self.possibleRooms[self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()],(0,0))
         self.player.playerIdle()
-        return(self.gameTurn())
+        return self.gameTurn()
 
     def on_execute(self):
         self.__on_init()
         while(self._running):
         ###game loop is here###
             while self.inMainMenu == True:
-    #           levelGenInfo2=text("Enter seed in console",self.font,(255,255,255),(50,80),self.surface)
-    #           WASDInfo=text("WASD to move around",self.font,(255,255,255),(50,110),self.surface)
-    #           QuitInfo=text("Esc to quit",self.font,(255,255,255),(50,140),self.surface)
-    #           self.surface.blit(self.startButton,(50,200))
-    #           pygame.display.flip()
                 self.mainMenu()
                 for event in pygame.event.get():
                     self.__on_event_menu(event)
@@ -364,8 +352,8 @@ class Escape3008:
         self.__loadRoomImgs()
         
     def __loadRoomImgs(self):
-        floorMap=tilemap(self.path+"\\Assets\\Environments\\SpaceStationTileset.png",32)
-        wallMap=tilemap(self.path+"\\Assets\\Environments\\housetileset.png",32)
+        floorMap=tilemap(self.resource_path("Assets\\Environments\\SpaceStationTileset.png"),32)
+        wallMap=tilemap(self.resource_path("Assets\\Environments\\housetileset.png"),32)
         dummyRooms=[Room(0,0,0,1,0,"Standard"),Room(0,0,1,0,0,"Standard"),Room(0,1,0,0,0,"Standard"),Room(1,0,0,0,0,"Standard"),Room(1,1,0,0,0,"Standard"),Room(0,1,1,0,0,"Standard"),Room(0,0,1,1,0,"Standard"),Room(1,0,1,0,0,"Standard"),Room(0,1,0,1,0,"Standard"),Room(1,0,0,1,0,"Standard"),Room(1,1,1,0,0,"Standard"),Room(0,1,1,1,0,"Standard"),Room(1,1,0,1,0,"Standard"),Room(1,0,1,1,0,"Standard"),Room(1,1,1,1,0,"Standard")]
         for x in range(len(dummyRooms)):
             dummyRooms[x].generateBits()
@@ -376,13 +364,19 @@ class Escape3008:
         print("Made room images")
 
     def __displayUI(self):
-        text("Health ="+str(self.player.hp),self.font,(255,255,255),(20,20),self.surface)
+        text(f"Health ={str(self.player.getHp())}",self.font,(255,255,255),(20,20),self.surface)
+        text(f"Attack power={str(self.player.getAtk())}",self.font,(255,255,255),(200,20),self.surface)
         pass
     
     def __loadImages(self):
-        buttonPath=self.path+"\\Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png"
+        buttonPath=self.resource_path("Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png")
         self.startButton=startButton("To start, press space",buttonPath,5,200,25,self.startButtonLoc).makeButton()
 
+    def resource_path(self, relative_path):
+        # Get absolute path to resource, works for dev and for PyInstaller
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
+    
 if __name__ == "__main__":
     game=Escape3008()
     game.on_execute()

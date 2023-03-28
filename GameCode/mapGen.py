@@ -48,7 +48,7 @@ class Room:
         self.enemies=None
         
     def getBits(self):
-        return(self.bitVal)
+        return self.bitVal
         
     def debugGetContentsAsList(self):
         #Mainly for debugging
@@ -78,7 +78,7 @@ class Room:
     def getEnemies(self):
         print(self.cleared)
         if self.cleared==False:
-            return(self.enemies)
+            return self.enemies
         else:
             return None
 
@@ -134,7 +134,7 @@ class TreasureRoom(SymbolRoom):
         self.item=item
 
     def getTreasure(self):
-        return(self.item)    
+        return self.item    
 
     def setItem(self,item):
         self.item=item
@@ -164,7 +164,7 @@ class Level:
         self.tier=tier
 
     def getTier(self):
-        return(self.tier)
+        return self.tier
 
     def debugGetContentsAsList(self):
         for x in range(0,len(self.rows)):
@@ -190,9 +190,9 @@ class Level:
                 self.rows[newLocation[1]].rooms[newLocation[0]].playerEnter()
                 success=True
             if success==True:
-                return(newLocation)
+                return newLocation
             else:
-                return(currentLocation)
+                return currentLocation
         except:
             print("Please enter a valid movement (i.e. into a room that exists)")
 
@@ -229,7 +229,7 @@ class Level:
         enemyData=self.enemies[enemyToUse]
         if enemyData["name"] == "enemy":
             newEnemy = enemy(enemyData["hp"],enemyData["atkpwr"],enemyData["atkspd"],enemyData["movspd"],enemyData["colour"],enemyData["moveops"],enemyData["name"],enemyData["screen"],enemyData["enemyGroup"],enemyData["bulletGroup"])
-        return(newEnemy)
+        return newEnemy
 class Row:
     def __init__(self,rooms):
         self.rooms=rooms

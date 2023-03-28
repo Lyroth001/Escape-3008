@@ -16,7 +16,7 @@ class bullet(sprite.Sprite):
         self.screen=screen
 
     def getType(self):
-        return("attack")
+        return "attack"
 
     def takeTurn(self, id=None):
         self.move()
