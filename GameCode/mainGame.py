@@ -20,14 +20,14 @@ class Escape3008:
         self._running=True
         self.size = self.width, self.height = 1024, 640
         self.collider = Rect((32,32),(self.width-94,self.height-94))
-        #coord for room player is currently in
+    #coord for room player is currently in
         self.playerLoc=[0,0]
-        #coord for where on the screen the player is after pause
+    #coord for where on the screen the player is after pause
         self.playerCoords = [32,32]
-        #stores the buttons currently on screen to be iterated through
+    #stores the buttons currently on screen to be iterated through
         self.buttons=[]
         self.level = None
-        #sets gamestate
+    #sets gamestate
         self.paused = False
         self.inMainMenu = True
         self.levelParameters=False
@@ -36,17 +36,17 @@ class Escape3008:
         self.inMainGame = False
         self.mainMenuOptions = False
         self.levelOptions = False
+
         self.possibleRooms={}
-#        self.entities={}
-#Groups to hold visible objects and variables related to them
+    #Groups to hold visible objects and variables related to them
         self.enemies=pygame.sprite.Group()
         self.enemyBullets=pygame.sprite.Group()
         self.playerBullets=pygame.sprite.Group()
         self.items=pygame.sprite.Group()
-        self.maxEnemyBullets=67
-        self.numBullets = 0
+        self.bosses=pygame.sprite.Group()
 
         self.font=pygame.font.SysFont("comicsans",30)
+        self.uiFont=pygame.font.SysFont("segoeuisemibold",20)
         self.startButtonLoc=(50,240)
         print("running")
 
@@ -66,7 +66,7 @@ class Escape3008:
             self._running = False
         if event.type == pygame.KEYDOWN:
             #manages player inputs
-            try:
+            #try:
                 if event.key==pygame.K_SPACE:
                     seed=self.getSeedMenu()
                     self.__loadLevel(seed)
@@ -76,8 +76,8 @@ class Escape3008:
                     self._running = False
                     self.inMainMenu = False
                     pygame.quit()
-            except:
-                print("")
+            #except:
+                #print("error")
                     
     def __on_event_game(self, event):
         if event.type == pygame.QUIT:
@@ -85,9 +85,7 @@ class Escape3008:
         if event.type == pygame.KEYDOWN:
             #manages player inputs
             try:
-                if event.key==pygame.K_LEFTBRACKET:
-                    print("Command-LeftBracket")
-                elif event.key==pygame.K_ESCAPE:
+                if event.key==pygame.K_ESCAPE:
                     self.inMainMenu=True
                     self.inMainGame=False
                     self.playerCoords=self.player.getLocation()
@@ -184,6 +182,7 @@ class Escape3008:
         self.enemyBullets.empty()
         self.playerBullets.empty()
         self.items.empty()
+        self.bosses.empty()
 
     def __on_cleanup(self):
         pygame.quit()
@@ -229,12 +228,13 @@ class Escape3008:
         toRemovePlayer=[]
         toRemoveEnemy=[]
         toRemoveItem=[]
-        toAdd=[]
+        toAddBullets=[]
+        toAddEnemies=[]
         #move and attack for each enemy
         for x in self.enemies.sprites():
             attack=x.takeTurn()
             if attack is not None:
-                toAdd.append(attack)
+                toAddBullets.append(attack)
         #move enemy bullets and check for player damage
         for x in self.enemyBullets.sprites():
             x.takeTurn()
@@ -243,6 +243,11 @@ class Escape3008:
             if sprite.collide_rect(self.player,x) == True:
                 x.doDamage(self.player)
                 toRemoveEnemy.append(x)
+        for x in self.bosses.sprites():
+            hold=x.takeTurn()
+            if hold is not None:
+                for y in hold:
+                    toAddEnemies.append(y)
         #move and check colls for player bullets
         for x in self.playerBullets.sprites():
             x.takeTurn()
@@ -254,6 +259,7 @@ class Escape3008:
             print(collisions)
             x.doDamage(collisions[x][0])
             print("damaged")
+        
         if len(self.items) > 0:
             for x in self.items.sprites():
                 x.itemIdle(self.surface)
@@ -268,7 +274,7 @@ class Escape3008:
             self.playerBullets.remove(x)
         for x in toRemoveItem:
             self.items.remove(x)
-        for x in toAdd:
+        for x in toAddBullets:
             self.addEnemyBullet(x)
 
         #checks for dead player and enemies
@@ -277,6 +283,7 @@ class Escape3008:
         deadEnemies=[]
         for x in self.enemies:
             if x.hp<=0:
+                self.player.gainScore(x.onDeath())
                 deadEnemies.append(x)
         for x in deadEnemies:
             self.enemies.remove(x)
@@ -346,7 +353,7 @@ class Escape3008:
         self.__on_cleanup()
         
     def __loadLevel(self,seed):
-        self.level=BuildLevel1(6,6,13,seed,1,self.surface,self.enemies,self.enemyBullets).getLevel()
+        self.level=BuildLevel1(6,6,13,seed,1,self.surface,self.enemies,self.enemyBullets,self.bosses).getLevel()
         self.playerLoc=self.level.getStart()
         self.level.visualiseLevel()
         self.__loadRoomImgs()
@@ -364,9 +371,9 @@ class Escape3008:
         print("Made room images")
 
     def __displayUI(self):
-        text(f"Health ={str(self.player.getHp())}",self.font,(255,255,255),(20,20),self.surface)
-        text(f"Attack power={str(self.player.getAtk())}",self.font,(255,255,255),(200,20),self.surface)
-        pass
+        text(f"Health = {str(self.player.getHp())}",self.uiFont,(255,255,255),(20,0),self.surface)
+        text(f"Attack power = {str(self.player.getAtk())}",self.uiFont,(255,255,255),(150,0),self.surface)
+        text(f"Score = {str(self.player.getScore())}",self.uiFont,(255,255,255),(320,0),self.surface)
     
     def __loadImages(self):
         buttonPath=self.resource_path("Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png")

@@ -140,12 +140,13 @@ class TreasureRoom(SymbolRoom):
         self.item=item
     
 class BossRoom(SymbolRoom):
-    def __init__(self,n,s,e,w,p,name,boss,symbol):
+    def __init__(self,n,s,e,w,p,name,symbol):
         super().__init__(n,s,e,w,p,name,symbol)
-        self.boss=boss
 
-    def update(self,n,s,e,w,p,name,boss,symbol):
+    def update(self,n,s,e,w,p,name,symbol):
         super().update(n,s,e,w,p,name,symbol)
+
+    def setBoss(self,boss):
         self.boss=boss
         
     def foughtBoss(self):
@@ -175,6 +176,7 @@ class Level:
             for x in range(0,len(self.rows[y].rooms)-1):
                 if self.rows[y].rooms[x].name.lower()=="start":
                     return [x,y]
+                
     def visualiseLevel(self):
         for x in range(0,len(self.rows)):
             self.rows[x].visualiseRow()
@@ -202,6 +204,9 @@ class Level:
                 if self.rows[y].rooms[x].isPlayer==1:
                     return [x,y]
 
+    def setBosses(self,bossList):
+        self.bosses=bossList
+
     def setEnemies(self,enemyList):
         self.enemies = enemyList
                 
@@ -211,10 +216,17 @@ class Level:
             if currentRoom.getType() == "Treasure room":
                 #spawn item
                 currentRoom.setItem(items.assignItem(player,self.tier))
-            elif currentRoom.getType() == "Boss":
+
+            elif currentRoom.getType() == "Boss room":
                 #spawn boss
-                pass
-            elif currentRoom.getType() != "Start":
+                print("boss room")
+                thisBoss=self.bosses[random.randint(0,len(self.bosses)-1)]
+                if thisBoss["name"]=="Doctor":
+                    toAdd=doctor(thisBoss["hp"],thisBoss["atkpwr"],thisBoss["atkspd"],thisBoss["movspd"],thisBoss["name"],thisBoss["screen"],thisBoss["bossGroup"],thisBoss["bulletGroup"],score=thisBoss["score"])
+                toAdd.bossInit(player)
+                currentRoom.setBoss(thisBoss)
+                
+            elif currentRoom.getType() == "Standard":
                 enemyNum=random.randint(2,10)
                 enemies=[]
                 for x in range(enemyNum):
@@ -228,7 +240,7 @@ class Level:
         enemyToUse=random.randint(0,len(self.enemies)-1)
         enemyData=self.enemies[enemyToUse]
         if enemyData["name"] == "enemy":
-            newEnemy = enemy(enemyData["hp"],enemyData["atkpwr"],enemyData["atkspd"],enemyData["movspd"],enemyData["colour"],enemyData["moveops"],enemyData["name"],enemyData["screen"],enemyData["enemyGroup"],enemyData["bulletGroup"])
+            newEnemy = enemy(enemyData["hp"],enemyData["atkpwr"],enemyData["atkspd"],enemyData["movspd"],enemyData["colour"],enemyData["name"],enemyData["screen"],enemyData["enemyGroup"],enemyData["bulletGroup"],enemyData["score"])
         return newEnemy
 class Row:
     def __init__(self,rooms):
@@ -322,7 +334,7 @@ class BuildFloorInterface:
                             connections.append(0)
                     if roomType != "Standard" and roomType != "Start":
                         if roomType == "Boss room":
-                            level.rows[y].rooms[x].update(connections[0],connections[1],connections[2],connections[3],room.isPlayer,roomType,room.getBoss(),room.getSymbol())
+                            level.rows[y].rooms[x].update(connections[0],connections[1],connections[2],connections[3],room.isPlayer,roomType,room.getSymbol())
                         if roomType == "Treasure room":
                             level.rows[y].rooms[x].update(connections[0],connections[1],connections[2],connections[3],room.isPlayer,roomType,room.getItem(),room.getSymbol())
                     else:
@@ -350,8 +362,7 @@ class BuildFloorInterface:
     def __selectBossRoom(self,level):
         print("Placing boss...")
         coord=self.__getRandomCoord()
-        boss="Doctor"
-        level.rows[coord[1]].changeRoom(coord[0],BossRoom(0,0,0,0,0,"Boss room",boss,"x"))
+        level.rows[coord[1]].changeRoom(coord[0],BossRoom(0,0,0,0,0,"Boss room","x"))
         return level
 
     def __checkRoomInBound(self,roomCoords,direction):

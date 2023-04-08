@@ -41,5 +41,5 @@ class atkBoost(item):
         self.player.gainAtk(self.atkUp)
 
 def assignItem(player,tier):
-    itemList=[healthBoost("Health up",player,(50,255,50),random.randint(0,tier)),atkBoost("Attack up",player,(50,255,255),random.randint(0,tier))]
+    itemList=[healthBoost("Health up",player,(50,255,50),random.randint(1,tier)),atkBoost("Attack up",player,(50,255,255),random.randint(1,tier))]
     return itemList[random.randint(0,len(itemList)-1)]

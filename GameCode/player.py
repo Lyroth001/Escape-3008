@@ -23,6 +23,7 @@ class player(sprite.Sprite):
         self.loc = strtLoc
         self.screen = screen
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
+        self.score=0
         
     def movePlayer(self,direction):
         self.loc[0] += direction[0]*self.speed
@@ -53,6 +54,13 @@ class player(sprite.Sprite):
 
     def getSpeed(self):
         return self.speed
+
+    def gainScore(self,score):
+        self.score+=score
+        print(f"score is now {self.score}")
+    
+    def getScore(self):
+        return self.score
 
     def playerIdle(self):
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))

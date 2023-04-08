@@ -7,8 +7,8 @@ class bullet(sprite.Sprite):
         #friendly fire is not a thing
         sprite.Sprite.__init__(self,bulletGroup)
         self.coords=strtcoords
-        self.sprite=Surface((16,16), SRCALPHA, 32).convert_alpha()
-        draw.circle(self.sprite,colour,(8,8),8)
+        self.sprite=Surface((radius*2,radius*2), SRCALPHA, 32).convert_alpha()
+        draw.circle(self.sprite,colour,(radius,radius),radius)
         self.rect=self.sprite.get_rect()
         self.speed=spd
         self.direction=direction
