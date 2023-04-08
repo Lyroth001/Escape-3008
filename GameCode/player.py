@@ -5,6 +5,7 @@ init()
 class player(sprite.Sprite):
     def __init__(self,speed,strtHealth,strtDmg,atkspd,maxBullet,strtLoc,screen,bulletGroup):
         #maybe pull these from a bin file?
+        sprite.Sprite.__init__(self)
         self.sprite = Surface((32,32), SRCALPHA, 32).convert_alpha()
         draw.circle(self.sprite,(50,0,255),(16,16),16)
         self.rect=self.sprite.get_rect()
@@ -22,6 +23,7 @@ class player(sprite.Sprite):
         self.loc = strtLoc
         self.screen = screen
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
+        self.score=0
         
     def movePlayer(self,direction):
         self.loc[0] += direction[0]*self.speed
@@ -39,14 +41,26 @@ class player(sprite.Sprite):
             self.dmgCount = self.dmgCooldown
     
     def gainHealth(self,healing):
-        print("healing")
         self.hp+=healing
+    
+    def getHp(self):
+        return self.hp
 
     def gainAtk(self,boost):
         self.dmg+=boost
 
+    def getAtk(self):
+        return self.dmg
+
     def getSpeed(self):
-        return(self.speed)
+        return self.speed
+
+    def gainScore(self,score):
+        self.score+=score
+        print(f"score is now {self.score}")
+    
+    def getScore(self):
+        return self.score
 
     def playerIdle(self):
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
@@ -54,7 +68,7 @@ class player(sprite.Sprite):
         self.rect.topleft=(self.loc[0],self.loc[1])
 
     def getLocation(self):
-        return(self.loc)
+        return self.loc
 
     def checkHitbox(self):
         return Rect(self.loc,(32,32))
@@ -63,17 +77,17 @@ class player(sprite.Sprite):
         self.atkBeat = 0
         if self.bulletNum != self.maxBullet:
             self.bulletNum += 1
-            return(bullet([self.loc[0]+16*direction[0],self.loc[1]+16*direction[1]],direction,8,(50,255,50),self.bulletSpd,self.dmg,self.screen,self.Group))
+            return bullet([self.loc[0]+16*direction[0],self.loc[1]+16*direction[1]],direction,8,(50,255,50),self.bulletSpd,self.dmg,self.screen,self.Group)
         else:
             self.bulletNum=0
-            return(bullet([self.loc[0]+16*direction[0],self.loc[1]+16*direction[1]],direction,8,(50,255,50),self.bulletSpd,self.dmg,self.screen,self.Group))
+            return bullet([self.loc[0]+16*direction[0],self.loc[1]+16*direction[1]],direction,8,(50,255,50),self.bulletSpd,self.dmg,self.screen,self.Group)
 
     def checkBeat(self):
-        return(self.atkBeat)
+        return self.atkBeat
 
     def checkOnBeat(self):
         if self.checkBeat() == self.atkSpd:
-            return(True)
+            return True
 
     def passBeat(self):
         if self.atkBeat != self.atkSpd:
