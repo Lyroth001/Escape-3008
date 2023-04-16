@@ -6,7 +6,6 @@ class item(sprite.Sprite):
         super().__init__()
         self.sprite=Surface((16,16), SRCALPHA, 32).convert_alpha()
         self.w, self.h = display.get_surface().get_size()
-        print(self.w,self.h)
         draw.circle(self.sprite,colour,(8,8),16)
         self.rect=self.sprite.get_rect()
         self.rect.topleft=(self.w/2,self.h/2)
@@ -17,8 +16,28 @@ class item(sprite.Sprite):
     
     def onPickup(self):
         #base method for item to apply its effect
-        
         pass
+
+class newFloor(item):
+    def __init__(self,name,player,colour,tier,enemyGroup,enemyBullets,bossGroup):
+        super().__init__(name,player,colour)
+        self.w, self.h=display.get_surface().get_size()
+        self.rect.topleft=(random.randint(32,self.w-32),random.randint(32,self.h-32))
+        self.tier=tier
+        self.enemyGroup=enemyGroup
+        self.enemyBullets=enemyBullets
+        self.bossGroup=bossGroup
+
+    def itemIdle(self, screen):
+        screen.blit(self.sprite,(self.rect.topleft))
+
+    def onPickup(self,mainGame=None):
+        #loads the new level, and resets mainGame variables accordingly
+        if mainGame is not None:
+            mainGame.loadLevel(random.randint(3,self.tier+6),random.randint(3,self.tier+6),random.randint(6,self.tier+6),self.tier,False)
+            mainGame.tier=self.tier
+            mainGame.player.setPlayerLoc([32,32])
+            mainGame.clearGroups()
 
 class healthBoost(item):
     def __init__(self,name,player,colour,healthRestored):

@@ -22,12 +22,16 @@ class enemy(sprite.Sprite):
         self.score=score
 
     def enemyInit(self,player):
+        #sets the enemy location and assigns the player
         self.loc = [random.randint(32*3,32*30),random.randint(32*3,32*10)]
         self.player = player
         self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
     
     def locatePlayer(self):
         return self.player.getLocation()
+    
+    def getHealth(self):
+        return self.hp
     
     def takeDamage(self,damage):
         self.hp -= damage
@@ -36,11 +40,12 @@ class enemy(sprite.Sprite):
         return "enemy"
     
     def onDeath(self):
-        print(f"increasing score by {self.score}")
         return self.score
 
     def takeTurn(self):
+        #calculates direction of player in relation to self, used to move and attack
         dirc = []
+        atkDirc=[]
         playerLoc=self.locatePlayer()
         xDiff=playerLoc[0]-self.loc[0]
         if xDiff>100 or xDiff<-100:
@@ -49,6 +54,10 @@ class enemy(sprite.Sprite):
             elif xDiff<0:
                 dirc.append(-1)
         else:
+            if xDiff>0:
+                atkDirc.append(1)
+            elif xDiff<0:
+                atkDirc.append(-1)
             dirc.append(0)
         yDiff=playerLoc[1]-self.loc[1]
         if yDiff>100 or yDiff<-100:
@@ -57,11 +66,17 @@ class enemy(sprite.Sprite):
             elif yDiff<0:
                 dirc.append(-1)
         else:
+            if yDiff>0:
+                atkDirc.append(1)
+            elif yDiff<0:
+                atkDirc.append(-1)
             dirc.append(0)
+        if dirc != [0,0]:
+            atkDirc=dirc
         self.move(dirc)
         self.rect.topleft=(self.loc[0],self.loc[1])
-        if dirc != [0,0]:
-            return self.attack(dirc)
+        if atkDirc != [0,0]:
+            return self.attack(atkDirc)
 
     def attack(self,dirc):
         if self.atktimer == self.atkspd:
@@ -83,31 +98,29 @@ class enemy(sprite.Sprite):
 
 
 class turret(enemy):
-    def __init__(self,hp,atkpwr,atkspd,movspd,strtloc,colour,moveoptions,name,screen):
-        super().__init__(self,hp,atkpwr,atkspd,movspd,strtloc,colour,moveoptions,name,screen)
+    #same as enemy above, except it will not move
+    def __init__(self,hp,atkpwr,atkspd,movspd,colour,name,screen,enemyGroup,bulletGroup,score=0):
+        super().__init__(hp,atkpwr,atkspd,movspd,colour,name,screen,enemyGroup,bulletGroup,score)
     def takeTurn(self):
-        self.attack()
-        
-class rusher(enemy):
-    def __init__(self,hp,atkpwr,atkspd,movspd,strtloc,colour,moveoptions,name,screen):
-        super().__init__(self,hp,atkpwr,atkspd,movspd,strtloc,colour,moveoptions,name,screen)
-    def takeTurn(self):
-        dirc=[]
+        dirc = []
         playerLoc=self.locatePlayer()
         xDiff=playerLoc[0]-self.loc[0]
-        if xDiff>30 or xDiff<-30:
+        if xDiff>10 or xDiff < -10:
             if xDiff>0:
                 dirc.append(1)
             elif xDiff<0:
                 dirc.append(-1)
         else:
-            dirc.append(random.randint(-1,1))
+            dirc.append(0)
         yDiff=playerLoc[1]-self.loc[1]
-        if yDiff>30 or yDiff<-30:
+        if yDiff>10 or yDiff<-10:
             if yDiff>0:
                 dirc.append(1)
             elif yDiff<0:
                 dirc.append(-1)
         else:
-            dirc.append(random.randint(-1,1))
-        self.move(dirc)
+            dirc.append(0)
+        self.rect.topleft=(self.loc[0],self.loc[1])
+        self.screen.blit(self.sprite,(self.loc[0],self.loc[1]))
+        if dirc != [0,0]:
+            return self.attack(dirc)

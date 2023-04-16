@@ -1,5 +1,6 @@
 from pygame import *
 from enemy import *
+from items import newFloor
 import random
 class boss(enemy):
     def __init__(self,hp,atkpwr,atkspd,movspd,colour,name,screen,enemyGroup,bulletGroup,score=0):
@@ -13,11 +14,11 @@ class doctor(boss):
         super().__init__(hp,atkpwr,atkspd,movspd,colour,name,screen,enemyGroup,bulletGroup,score)
 
     def bossInit(self,player):
-        print("here")
         self.loc = [random.randint(32*3,32*30),random.randint(32*3,32*10)]
         self.player=player
 
     def takeTurn(self):
+        #as enemy, except selects between possible attack options and executes one of them
         toTake = random.randint(1,10)
         dirc = []
         playerLoc=super().locatePlayer()
@@ -75,7 +76,7 @@ class doctor(boss):
         else:
             self.atktimer+=1
     def atk3(self):
-    #spawn enemies
+    #bullets in 8 directions
         if self.atktimer == self.atkspd:
             self.atktimer = 0
             bullet([self.loc[0]-20,self.loc[1]-20],[-1,-1],8,(255,0,255),2,self.dmg,self.screen,self.bulletGroup)
@@ -90,15 +91,14 @@ class doctor(boss):
             self.atktimer += 1
 
     def atk4(self,dirc):
+        #standard single bullet attack
         if self.atktimer == self.atkspd:
             self.atktimer = 0
-            bullet([self.loc[0]+20*dirc[0],self.loc[1]+20*dirc[1]],dirc,6,(255,0,255),2,self.dmg,self.screen,self.bulletGroup)
+            bullet([self.loc[0]+32*dirc[0],self.loc[1]+32*dirc[1]],dirc,6,(255,0,255),2,self.dmg,self.screen,self.bulletGroup)
         else:
             self.atktimer += 1
 
-    def onDeath(self):
-        pass
-
-def setBoss(screen,bossGroup,bulletGroup):
-    bossList=0
-    return bossList[random.randint(0,len(bossList)-1)]
+    def onDeath(self,tier,enemyGroup,enemyBullet,bossGroup):
+        #increases the players score and generates a new floor item, allowing further progression
+        self.player.gainScore(self.score)
+        return newFloor("nextLevel",self.player,(0,0,0),tier+1,enemyGroup,enemyBullet,bossGroup)

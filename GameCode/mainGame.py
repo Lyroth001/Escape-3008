@@ -6,6 +6,8 @@
 #check seed 65533925843339
 #seed with item room by spawn 9046123406124146
 
+#ADDED
+
 import pygame
 import os
 import sys
@@ -36,8 +38,8 @@ class Escape3008:
         self.inMainGame = False
         self.mainMenuOptions = False
         self.levelOptions = False
-
         self.possibleRooms={}
+        self.tier=1
     #Groups to hold visible objects and variables related to them
         self.enemies=pygame.sprite.Group()
         self.enemyBullets=pygame.sprite.Group()
@@ -62,22 +64,21 @@ class Escape3008:
         return self.surface
     
     def __on_event_menu(self, event):
+        #Handles events during the menu screen
         if event.type == pygame.QUIT:
             self._running = False
         if event.type == pygame.KEYDOWN:
             #manages player inputs
-            #try:
-                if event.key==pygame.K_SPACE:
-                    seed=self.getSeedMenu()
-                    self.__loadLevel(seed)
-                    self.inMainMenu=False
-                    self.inMainGame=True
-                elif event.key==pygame.K_ESCAPE:
-                    self._running = False
-                    self.inMainMenu = False
-                    pygame.quit()
-            #except:
-                #print("error")
+            if event.key==pygame.K_SPACE:
+                self.seed=self.getSeedMenu()
+                self.loadLevel(6,6,13,1,True)
+                self.inMainMenu=False
+                self.inMainGame=True
+            elif event.key==pygame.K_ESCAPE:
+                self._running = False
+                self.inMainMenu = False
+                pygame.quit()
+            
                     
     def __on_event_game(self, event):
         if event.type == pygame.QUIT:
@@ -97,6 +98,7 @@ class Escape3008:
                 print("Please generate a map with space before attempting to move")
    
     def gameKeyManager(self,key):
+        #handles events for keypresses, controlling player movement and interaction
         currentLoc=self.player.getLocation()
         speed=self.player.getSpeed()
         if key[K_w] and key[K_a]:
@@ -124,42 +126,32 @@ class Escape3008:
             if self.collider.collidepoint(currentLoc[0]-(1*speed),currentLoc[1]):
                 self.player.movePlayer([-1,0])
         if key[K_q]:
-            print(self.player.getLocation())
             self.level.visualiseLevel()
-        if key[K_LEFTBRACKET]:
-                print("Command-LeftBracket")  
+        if key[K_LEFTBRACKET]:  
                 self.clearGroups()
         if key[K_e]:
             if len(self.enemies)==0:
                 currentRoomBits=self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()
                 if currentRoomBits & 0b0001 == 0b0001 and currentLoc[0] in range(32*15,32*16) and currentLoc[1] == 32:
                     self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].setClear()
-                    #print(self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].isClear())
-                    print("NConnect")
                     self.playerLoc=self.level.movePlayer([0,-1],self.playerLoc)
                     self.player.setPlayerLoc([496,17*32])
                     self.clearGroups()
                     self.getRoomContents(self.playerLoc,self.player)
                 if currentRoomBits & 0b0010 == 0b0010 and currentLoc[0] in range(32*15,32*17) and currentLoc[1] in range(32*18,32*19):
                     self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].setClear()
-                    #print(self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].isClear())
-                    print("SConnect")
                     self.playerLoc=self.level.movePlayer([0,1],self.playerLoc)
                     self.player.setPlayerLoc([496,2*32])
                     self.clearGroups()
                     self.getRoomContents(self.playerLoc,self.player)
                 if currentRoomBits & 0b0100 == 0b0100 and currentLoc[0] == 960 and currentLoc[1] in range(32*9,32*11):
                     self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].setClear()
-                    #print(self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].isClear())
-                    print("EConnection")
                     self.playerLoc=self.level.movePlayer([1,0],self.playerLoc)
                     self.player.setPlayerLoc([64,304])
                     self.clearGroups()
                     self.getRoomContents(self.playerLoc,self.player)
                 if currentRoomBits & 0b1000 == 0b1000 and currentLoc[0] == 32 and currentLoc[1] in range(32*9,32*11):
                     self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].setClear()
-                    #print(self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].isClear())
-                    print("WConnection")
                     self.playerLoc=self.level.movePlayer([-1,0],self.playerLoc)
                     self.player.setPlayerLoc([928,304])
                     self.clearGroups()
@@ -178,16 +170,18 @@ class Escape3008:
                 self.addPlayerBullet(self.player.shoot([1,0]))
 
     def clearGroups(self):
+        #empties all sprite groups
         self.enemies.empty()
         self.enemyBullets.empty()
         self.playerBullets.empty()
         self.items.empty()
         self.bosses.empty()
 
-    def __on_cleanup(self):
+    def __onExit(self):
         pygame.quit()
 
     def mainMenu(self):
+        #draws the main menu
         self.buttons=[]
         self.surface.fill((52,78,91))
         self.surface.blit(self.startButton,self.startButtonLoc)
@@ -200,6 +194,7 @@ class Escape3008:
         pygame.display.flip()
 
     def getSeedMenu(self):
+        #draws the menu and handles input of the seed used for random number generation
         nums=["0","1","2","3","4","5","6","7","8","9",]
         returning = False
         seedInput=""
@@ -222,9 +217,12 @@ class Escape3008:
         return int(seedInput)
 
     def mainGameInitialise(self):
-        self.player = player(2,10,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
+        #loads the player
+        self.player = player(2,20,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
 
     def gameTurn(self):
+        #handles the frame by fram running of the game
+        #enemy movement, and collisions between objects
         toRemovePlayer=[]
         toRemoveEnemy=[]
         toRemoveItem=[]
@@ -254,19 +252,29 @@ class Escape3008:
             if x.checkCol(self.collider) == False:
                 toRemovePlayer.append(x)
         #gets dict of all collisions between player bullets and enemies, then performs calcs
-        collisions=sprite.groupcollide(self.playerBullets,self.enemies,True,False)
-        for x in collisions:
-            print(collisions)
-            x.doDamage(collisions[x][0])
-            print("damaged")
+        if self.enemies:
+            collisions=sprite.groupcollide(self.playerBullets,self.enemies,True,False)
+            for x in collisions:
+                x.doDamage(collisions[x][0])
+        #collisions between player bullets and a boss
+        if self.bosses:
+            for x in self.playerBullets.sprites():
+                boss=self.bosses.sprites()
+                boss=boss[0]
+                if sprite.collide_rect(boss,x) == True:
+                    x.doDamage(boss)
+                    toRemovePlayer.append(x)
         
         if len(self.items) > 0:
             for x in self.items.sprites():
                 x.itemIdle(self.surface)
                 if sprite.collide_rect(self.player,x) == True:
-                    x.onPickup()
-                    toRemoveItem.append(x)
-    
+                    if type(x) == newFloor:
+                        x.onPickup(self)
+                    else:        
+                        x.onPickup()
+                        toRemoveItem.append(x)
+        
         #deletes and adds bullets to sprite groups as necessary
         for x in toRemoveEnemy:
             self.enemyBullets.remove(x)   
@@ -281,16 +289,24 @@ class Escape3008:
         if self.player.hp<=0:
             return True
         deadEnemies=[]
+        deadBosses=[]
         for x in self.enemies:
             if x.hp<=0:
                 self.player.gainScore(x.onDeath())
                 deadEnemies.append(x)
+
+        for x in self.bosses:
+            if x.hp<=0:
+                self.addItem(x.onDeath(self.tier,self.enemies,self.enemyBullets,self.bosses))
+                deadBosses.append(x)
+
         for x in deadEnemies:
             self.enemies.remove(x)
+        
+        for x in deadBosses:
+            self.bosses.remove(x)
 
-    def addEntity(self,entity):
-        self.entities[entity.id]=entity
-
+    #the following addX functions all add objects to the requisite sprite group
     def addPlayerBullet(self,entity):
         self.playerBullets.add(entity)
     
@@ -310,7 +326,6 @@ class Escape3008:
         type=room.getType()
         if type != "Start":
             self.level.loadRoomContents(roomCoords,player)
-            print(type)
             if type.lower() == "standard":
                 contents = room.getEnemies()
                 if contents != None:
@@ -320,14 +335,17 @@ class Escape3008:
                 if contents != None:
                     self.addItem(contents)
             elif type.lower() =="boss room":
-                pass
+                if room.isClear:
+                    self.addItem(newFloor("nextLevel",self.player,(0,0,0),self.tier+1,self.enemies,self.enemyBullets,self.bosses))
 
     def mainGame(self):
+        #draws the room and gets the results of the current frame
         self.surface.blit(self.possibleRooms[self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()],(0,0))
         self.player.playerIdle()
         return self.gameTurn()
 
     def on_execute(self):
+        #handles the core running of the game engine
         self.__on_init()
         while(self._running):
         ###game loop is here###
@@ -350,15 +368,19 @@ class Escape3008:
                     self.inMainGame=False
                     self.inMainMenu=True
             self.clearGroups()
-        self.__on_cleanup()
+        self.__onExit()
         
-    def __loadLevel(self,seed):
-        self.level=BuildLevel1(6,6,13,seed,1,self.surface,self.enemies,self.enemyBullets,self.bosses).getLevel()
+    def loadLevel(self,roomsX,roomsY,numRooms,tier,isFirst):
+        #creates the level
+        self.level=BuildLevel1(roomsX,roomsY,numRooms,self.seed,tier,self.surface,self.enemies,self.enemyBullets,self.bosses).getLevel()
         self.playerLoc=self.level.getStart()
         self.level.visualiseLevel()
-        self.__loadRoomImgs()
+        if isFirst:
+            #if this is the first level created makes all possible rooms
+            self.__loadRoomImgs()
         
     def __loadRoomImgs(self):
+        #creates images for all possible rooms
         floorMap=tilemap(self.resource_path("Assets\\Environments\\SpaceStationTileset.png"),32)
         wallMap=tilemap(self.resource_path("Assets\\Environments\\housetileset.png"),32)
         dummyRooms=[Room(0,0,0,1,0,"Standard"),Room(0,0,1,0,0,"Standard"),Room(0,1,0,0,0,"Standard"),Room(1,0,0,0,0,"Standard"),Room(1,1,0,0,0,"Standard"),Room(0,1,1,0,0,"Standard"),Room(0,0,1,1,0,"Standard"),Room(1,0,1,0,0,"Standard"),Room(0,1,0,1,0,"Standard"),Room(1,0,0,1,0,"Standard"),Room(1,1,1,0,0,"Standard"),Room(0,1,1,1,0,"Standard"),Room(1,1,0,1,0,"Standard"),Room(1,0,1,1,0,"Standard"),Room(1,1,1,1,0,"Standard")]
@@ -371,16 +393,19 @@ class Escape3008:
         print("Made room images")
 
     def __displayUI(self):
+        #draws the player UI with stats
         text(f"Health = {str(self.player.getHp())}",self.uiFont,(255,255,255),(20,0),self.surface)
         text(f"Attack power = {str(self.player.getAtk())}",self.uiFont,(255,255,255),(150,0),self.surface)
         text(f"Score = {str(self.player.getScore())}",self.uiFont,(255,255,255),(320,0),self.surface)
     
     def __loadImages(self):
+        #loads the button image
         buttonPath=self.resource_path("Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png")
-        self.startButton=startButton("To start, press space",buttonPath,5,200,25,self.startButtonLoc).makeButton()
+        self.startButton=button("To start, press space",buttonPath,5,200,25,self.startButtonLoc).makeButton()
 
     def resource_path(self, relative_path):
-        # Get absolute path to resource, works for dev and for PyInstaller
+        #get absolute path to resource, works for dev and for PyInstaller
+        #used in creation of .exe file
         base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
         return os.path.join(base_path, relative_path)
     
