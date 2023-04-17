@@ -189,7 +189,7 @@ class Escape3008:
         text("Welcome to Escape 3008!",self.font,(255,255,255),(50,80),self.surface)
         text("Use WASD to move around.",self.font,(255,255,255),(50,110),self.surface)
         text("Use arrow keys to attack.",self.font,(255,255,255),(50,140),self.surface)
-        text("Use E to interact with objects (doors and items).",self.font,(255,255,255),(50,170),self.surface)
+        text("Use E to interact with doors.",self.font,(255,255,255),(50,170),self.surface)
         text("Press Esc to quit.",self.font,(255,255,255),(50,200),self.surface)
         pygame.display.flip()
 
@@ -218,7 +218,7 @@ class Escape3008:
 
     def mainGameInitialise(self):
         #loads the player
-        self.player = player(2,20,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
+        self.player = player(2,10000,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
 
     def gameTurn(self):
         #handles the frame by fram running of the game
@@ -335,7 +335,7 @@ class Escape3008:
                 if contents != None:
                     self.addItem(contents)
             elif type.lower() =="boss room":
-                if room.isClear:
+                if room.isClear() == True:
                     self.addItem(newFloor("nextLevel",self.player,(0,0,0),self.tier+1,self.enemies,self.enemyBullets,self.bosses))
 
     def mainGame(self):

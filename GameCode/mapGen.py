@@ -287,7 +287,6 @@ class BuildFloorInterface:
         self.maxRooms=rooms
         self.directions=[[0,-1],[0,1],[1,0],[-1,0]]
         self.floorPlan=self.__createPathStartToBoss()
-        self.printMap()
 
     def getLevel(self):
         return self.floorPlan
@@ -484,8 +483,3 @@ class BuildFloorInterface:
                     placed = True
                 except:
                     placed = False
-                        
-    def printMap(self):
-        #outputs the visual map of a level
-        for x in range(0,len(self.floorPlan.rows)):
-            print(self.floorPlan.rows[x].debugGetContentsAsList())
