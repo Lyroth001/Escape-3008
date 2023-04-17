@@ -218,7 +218,7 @@ class Escape3008:
 
     def mainGameInitialise(self):
         #loads the player
-        self.player = player(2,10000,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
+        self.player = player(2,20,5,50,5,[self.playerCoords[0],self.playerCoords[1]],self.surface,self.playerBullets)
 
     def gameTurn(self):
         #handles the frame by fram running of the game
