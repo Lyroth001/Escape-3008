@@ -12,7 +12,7 @@ class player(sprite.Sprite):
         self.speed = speed
         self.maxBullet = maxBullet
         self.bulletNum = 0
-        self.bulletSpd = 1
+        self.bulletSpd = 2
         self.hp = strtHealth
         self.dmg = strtDmg
         #dmgcoolDown and dmgCount both limit the speed the player takes damage, preventing dying when first entering a roon

@@ -36,7 +36,7 @@ class Escape3008:
         self.inLevel = False
         self.database = False
         self.inMainGame = False
-        self.mainMenuOptions = False
+        self.inDeathScreen = False
         self.levelOptions = False
         self.possibleRooms={}
         self.tier=1
@@ -50,6 +50,8 @@ class Escape3008:
         self.font=pygame.font.SysFont("comicsans",30)
         self.uiFont=pygame.font.SysFont("segoeuisemibold",20)
         self.startButtonLoc=(50,240)
+        self.deathButtonLoc=(50,240)
+        self.clock=pygame.time.Clock()
         print("running")
 
     def __on_init(self):
@@ -78,7 +80,20 @@ class Escape3008:
                 self._running = False
                 self.inMainMenu = False
                 pygame.quit()
-            
+
+    def __on_event_deathMenu(self, event):
+        #Handles events during the death screen
+        if event.type == pygame.QUIT:
+            self._running = False
+        if event.type == pygame.KEYDOWN:
+            #manages player inputs
+            if event.key==pygame.K_SPACE:
+                self.inDeathScreen=False
+                self.inMainMenu=True
+            elif event.key==pygame.K_ESCAPE:
+                self._running = False
+                self.inDeathScreen = False
+                pygame.quit()
                     
     def __on_event_game(self, event):
         if event.type == pygame.QUIT:
@@ -191,6 +206,10 @@ class Escape3008:
         text("Use arrow keys to attack.",self.font,(255,255,255),(50,140),self.surface)
         text("Use E to interact with doors.",self.font,(255,255,255),(50,170),self.surface)
         text("Press Esc to quit.",self.font,(255,255,255),(50,200),self.surface)
+        try:
+            text(f"Previous score = {self.player.score}",self.font,(255,255,255),(600,80),self.surface)
+        except:
+            text(f"Previous score = 0",self.font,(255,255,255),(600,80),self.surface)
         pygame.display.flip()
 
     def getSeedMenu(self):
@@ -343,30 +362,43 @@ class Escape3008:
         self.surface.blit(self.possibleRooms[self.level.rows[self.playerLoc[1]].rooms[self.playerLoc[0]].getBits()],(0,0))
         self.player.playerIdle()
         return self.gameTurn()
+    
+    def deathScreen(self):
+        self.surface.fill((52,78,91))
+        text(f"You Died :(",self.font,(255,255,255),(50,150),self.surface)
+        text(f"Your score was {self.player.score}",self.font,(255,255,255),(50,200),self.surface)
+        self.surface.blit(self.deathButton,self.deathButtonLoc)
+        pygame.display.flip()
 
     def on_execute(self):
         #handles the core running of the game engine
         self.__on_init()
         while(self._running):
         ###game loop is here###
-            while self.inMainMenu == True:
+            while self.inMainMenu:
                 self.mainMenu()
                 for event in pygame.event.get():
                     self.__on_event_menu(event)
-            if self.inMainGame == True:
+            if self.inMainGame:
                 self.mainGameInitialise()
-            while self.inMainGame == True:
+            while self.inMainGame:
                 isDead=self.mainGame()
                 keys = key.get_pressed() 
                 self.gameKeyManager(keys)
                 for event in pygame.event.get():
                     self.__on_event_game(event)
-                if self._running == True:
+                if self._running:
                     self.__displayUI()
                     display.flip()
                 if isDead:
                     self.inMainGame=False
-                    self.inMainMenu=True
+                    self.inDeathScreen=True
+                #controls fps
+                self.clock.tick(200)
+            while self.inDeathScreen:
+                self.deathScreen()
+                for event in pygame.event.get():
+                    self.__on_event_deathMenu(event)
             self.clearGroups()
         self.__onExit()
         
@@ -401,7 +433,8 @@ class Escape3008:
     def __loadImages(self):
         #loads the button image
         buttonPath=self.resource_path("Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png")
-        self.startButton=button("To start, press space",buttonPath,5,200,25,self.startButtonLoc).makeButton()
+        self.startButton=button("To start, press space",buttonPath,5,210,25,self.startButtonLoc).makeButton()
+        self.deathButton=button("Press space to try again",buttonPath,5,250,25,self.deathButtonLoc).makeButton()
 
     def resource_path(self, relative_path):
         #get absolute path to resource, works for dev and for PyInstaller
