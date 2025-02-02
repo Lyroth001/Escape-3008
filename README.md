@@ -1,4 +1,4 @@
-Created by Zac.D for AQA A-Level computer science
+Created by Lye.D for AQA A-Level computer science
 
 How to start:
 
