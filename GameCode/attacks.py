@@ -1,5 +1,3 @@
-#TODO Will not work, finish implementing sprites
-
 from pygame import *
 class bullet(sprite.Sprite):
     def __init__(self,strtcoords,direction,radius,colour,spd,dmg,screen,bulletGroup):
@@ -22,6 +20,7 @@ class bullet(sprite.Sprite):
         self.move()
 
     def move(self):
+        #moves the bullet accross the screen
         self.coords[0]+=self.direction[0]*self.speed
         self.coords[1]+=self.direction[1]*self.speed
         self.rect.topleft=(self.coords[0],self.coords[1])
@@ -31,6 +30,7 @@ class bullet(sprite.Sprite):
         target.takeDamage(self.dmg)
     
     def checkCol(self,collider):
+        #used in mainGame to check if the bullet is out of bounds and remove if necessary
         if collider.collidepoint(self.coords):
             return True
         else:

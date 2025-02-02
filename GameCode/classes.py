@@ -6,6 +6,7 @@ import os
 init()
 
 class text:
+    #class to draw text
     def __init__(self,text,font,colour,coords,surface):
         self.position=coords
         self.text=text
@@ -19,6 +20,7 @@ class text:
         self.surface.blit(text, self.position)
 
 class drawRoom():
+    #class to generate an image for a room with specified connections
     def __init__(self,room,windowSize,floorImg,wallImg):
         self.room = room
         self.bits = self.room.getBits()
@@ -27,14 +29,13 @@ class drawRoom():
         self.width = windowSize[0]
         self.height = windowSize[1]
         self.tileSize = 32
-        #house tileset is tilesize of 32, as is ship
-        #probably gonna use house for the walls and ship for flooring, they're the same size
-        #so it shouldn't matter
+        #both tilesets used have a size of 32 pixels
         self.floorMap = floorImg
         self.wallMap = wallImg
         self.getTiles()
 
     def getTiles(self):
+        #loads the individual tiles used to make the rooms
         #corners
         self.UCornerL=self.wallMap.getTile(5*32,7*32)
         self.UCornerR=self.wallMap.getTile(7*32,7*32)
@@ -56,6 +57,7 @@ class drawRoom():
         self.doorImgVert2=self.floorMap.getTile(12*32,21*32)
 
     def testTiles(self):
+        #Debugging, used to check each image is being correctly loaded
         #corners
         self.screen.blit(self.UCornerL,(0,0))
         self.screen.blit(self.UCornerR,(self.width-self.tileSize,0))
@@ -71,6 +73,7 @@ class drawRoom():
         return self.screen
 
     def generateImage(self):
+        #places the tiles onto the image
         currentLoc=[0,0]
         num=2
         for x in range(int((self.width*self.height)/self.tileSize)):
@@ -123,6 +126,7 @@ class drawRoom():
         return self.screen
     
     def placeDoorways(self):
+        #adds the doorway images to the room
         if self.bits & 0b0001 == 0b0001:
             self.screen.blit(self.doorImgHoriz,(self.width/2-self.tileSize,0))
             self.screen.blit(self.doorImgHoriz2,(self.width/2,0))
@@ -138,6 +142,7 @@ class drawRoom():
             
                     
 class button():
+    #way to display text with a button-style background
     #start and end tile should be rects
     #height and width should be divisible by the tilesize of the tilemap
     def __init__(self,text,img,tileSize,buttonWidth,buttonHeight,location):
@@ -173,8 +178,6 @@ class button():
         currentLoc=[0,0]
         rects=self.getImgs()
         for x in range(int(self.width*self.height/self.tileSize)):
-            #If first get tile 0, if still on top row get tile 1, if end of top row get tile 2, etc
-            #self.button.blit(rects[x],(currentLoc[0],currentLoc[1]))
             if currentLoc[0] != self.width:
                 if currentLoc[0]==0 and currentLoc[1]==0:
                     self.button.blit(rects[0],(currentLoc[0],currentLoc[1]))
@@ -199,63 +202,24 @@ class button():
                 currentLoc[0]=0
                 currentLoc[1]+=self.tileSize
         buttonText=text(self.text,self.font,(0,0,0),(0,0),self.button)
-        print("Made button")
         return self.button
-    
-    def checkCollision(self, location):
-        pass
-
-class startButton(button):
-    def __init__(self,text,img,tileSize,buttonWidth,buttonHeight,location):
-        super().__init__(text,img,tileSize,buttonWidth,buttonHeight,location)
-
-    def onClick(self,game):
-        game.mainMenu=False
-        game.levelParameters=True
-        
-class optionsButton(button):
-    def __init__(self,text,img,tileSize,buttonWidth,buttonHeight,location):
-        super().__init__(text,img,tileSize,buttonWidth,buttonHeight,location)
-
-    def onClick(self,game):
-        if game.inLevel==True:
-            game.levelOptions=True
-            game.inLevel=False
-        else:
-            game.mainMenu=False
-            game.mainMenuOptions=True
 
 class tilemap:
+    #loads a tilemap and silces it into specified tile sizes
     def __init__(self,img,tileSize):
         self.img=image.load(img).convert_alpha()
         self.size=tileSize
         
     def getTile(self,rectX,rectY):
+        #gets the tile at the specified coordinate
         toGet=Rect(rectX,rectY,self.size,self.size)
         imgToReturn=Surface(toGet.size).convert()
         imgToReturn.blit(self.img,(0,0),toGet)
         return imgToReturn
     
     def getTiles(self,rects):
+        #gets a list of tiles at specified coordinates
         imgs=[]
         for x in range(len(rects)):
             imgs.append(self.getTile(rects[x][0],rects[x][1]))
         return imgs
-
-if __name__=="__main__":
-    size=(1024,640)
-    screen = display.set_mode(size)
-    path=os.path.dirname(__file__)
-    stationPath=path+"\\Assets\\SpaceStationTileset.png"
-    testButton=button("ABC123","C:\\Users\\zac\\OneDrive\\Documents\\Code\\Escape 3008\\GameCode\\Assets\\UI_elements\\RetroWindowsGUI\\Windows_Button.png",5,500,100,(20,80))
-    toAdd=testButton.makeButton()
-    screen.blit(toAdd,(50,50))
-    #NOTE-Will not work until paths changed to tilemap
-    testRoomData=Room(1,1,1,1,0,"Standard")
-    testRoomData.generateBits()
-    testDrawRoom = drawRoom(testRoomData,size,"C:\\Users\\zac\\OneDrive\\Documents\\Code\\Escape 3008\\GameCode\\Assets\\SpaceStationTileset.png","C:\\Users\\zac\\OneDrive\\Documents\\Code\\Escape 3008\\GameCode\\Assets\\housetileset.png")
-    screen.blit(testDrawRoom.generateImage(),(0,0))
-
-#   screen.blit(toAdd,(250,250))
-    display.flip()
-  #  input(":::")

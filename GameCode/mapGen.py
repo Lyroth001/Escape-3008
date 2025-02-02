@@ -1,3 +1,5 @@
+#use cafe later?
+#ADDED
 import random
 import items
 from enemy import *
@@ -30,6 +32,7 @@ class Room:
         self.drawOptions=[f"┌─{self.northConnection}─┐","│   │",f"{self.westConnection} {self.player} {self.eastConnection}",f"│   │",f"└─{self.southConnection}─┘"]
 
     def generateBits(self):
+        #used for quick IDing of room connections
         self.bitVal=0b0000
         if self.n==1:
             self.bitVal+=0b0001
@@ -51,7 +54,7 @@ class Room:
         return self.bitVal
         
     def debugGetContentsAsList(self):
-        #Mainly for debugging
+        #prints off contents of the room
         return [self.n, self.s, self.e, self.w, self.isPlayer,self.name]
 
     def getType(self):
@@ -76,23 +79,24 @@ class Room:
         self.enemies=enemies
     
     def getEnemies(self):
-        print(self.cleared)
         if self.cleared==False:
             return self.enemies
         else:
             return None
 
     def print(self):
-        #print(self.name, end="")
+        #draws the room individually
         print(f"┌─{self.northConnection}─┐\n│   │\n{self.westConnection} {self.player} {self.eastConnection}\n│   │\n└─{self.southConnection}─┘",end="")
         
     def printPart(self,toPrint,isEnd):
+        #prints a section of the room to be tied together in the map
         if isEnd == False:
             print(self.drawOptions[toPrint],end="")
         else:
             print(self.drawOptions[toPrint]+"\n",end="")
 
 class SymbolRoom(Room):
+    #superclass used by all special rooms
     def __init__(self,n,s,e,w,p,name,symbol):
         super().__init__(n,s,e,w,p,name)
         self.symbol=symbol
@@ -120,9 +124,7 @@ class SymbolRoom(Room):
         self.drawOptions=[f"┌─{self.northConnection}─┐",f"│{self.symbol}  │",f"{self.westConnection} {self.player} {self.eastConnection}",f"│   │",f"└─{self.southConnection}─┘"]
 
     def print(self):
-        #print(self.name,end="")
         print(f"┌─{self.northConnection}─┐\n│{self.symbol}   │\n{self.westConnection} {self.player} {self.eastConnection}\n│  {self.item}│\n└─{self.southConnection}─┘",end="")
-
         
 class TreasureRoom(SymbolRoom):
     def __init__(self,n,s,e,w,p,name,item,symbol):
@@ -148,10 +150,6 @@ class BossRoom(SymbolRoom):
 
     def setBoss(self,boss):
         self.boss=boss
-        
-    def foughtBoss(self):
-        #completes level, moves to next
-        pass
     
     def getBoss(self):
         return self.boss
@@ -168,6 +166,7 @@ class Level:
         return self.tier
 
     def debugGetContentsAsList(self):
+        #prints contents of each room in the level
         for x in range(0,len(self.rows)):
             print(self.rows[x].debugGetContentsAsList())
 
@@ -178,10 +177,12 @@ class Level:
                     return [x,y]
                 
     def visualiseLevel(self):
+        #draws map on the command line
         for x in range(0,len(self.rows)):
             self.rows[x].visualiseRow()
             
     def movePlayer(self, direction,currentLocation):
+        #changes which room the player is in to adjacent specified one
         try:
             newLocation=[0,0]
             success=False
@@ -199,6 +200,7 @@ class Level:
             print("Please enter a valid movement (i.e. into a room that exists)")
 
     def getPlayerLocation(self):
+        #gets room coord of the player
         for y in range(0,len(self.rows)):
             for x in range(0,len(self.rows[y].rooms)-1):
                 if self.rows[y].rooms[x].isPlayer==1:
@@ -211,6 +213,7 @@ class Level:
         self.enemies = enemyList
                 
     def loadRoomContents(self,currentRoom,player):
+        #sets the contents of the specified room
         currentRoom=self.rows[currentRoom[1]].rooms[currentRoom[0]]
         if currentRoom.isClear() == False:
             if currentRoom.getType() == "Treasure room":
@@ -219,7 +222,6 @@ class Level:
 
             elif currentRoom.getType() == "Boss room":
                 #spawn boss
-                print("boss room")
                 thisBoss=self.bosses[random.randint(0,len(self.bosses)-1)]
                 if thisBoss["name"]=="Doctor":
                     toAdd=doctor(thisBoss["hp"],thisBoss["atkpwr"],thisBoss["atkspd"],thisBoss["movspd"],thisBoss["name"],thisBoss["screen"],thisBoss["bossGroup"],thisBoss["bulletGroup"],score=thisBoss["score"])
@@ -227,7 +229,7 @@ class Level:
                 currentRoom.setBoss(thisBoss)
                 
             elif currentRoom.getType() == "Standard":
-                enemyNum=random.randint(2,10)
+                enemyNum=random.randint(2,6+self.tier)
                 enemies=[]
                 for x in range(enemyNum):
                     toAdd=self.buildEnemy()
@@ -237,11 +239,15 @@ class Level:
                 currentRoom.setEnemies(enemies)
 
     def buildEnemy(self):
+        #uses dicts to build a number of enemies for standard rooms
         enemyToUse=random.randint(0,len(self.enemies)-1)
         enemyData=self.enemies[enemyToUse]
         if enemyData["name"] == "enemy":
             newEnemy = enemy(enemyData["hp"],enemyData["atkpwr"],enemyData["atkspd"],enemyData["movspd"],enemyData["colour"],enemyData["name"],enemyData["screen"],enemyData["enemyGroup"],enemyData["bulletGroup"],enemyData["score"])
+        else:
+            newEnemy = turret(enemyData["hp"],enemyData["atkpwr"],enemyData["atkspd"],enemyData["movspd"],enemyData["colour"],enemyData["name"],enemyData["screen"],enemyData["enemyGroup"],enemyData["bulletGroup"],enemyData["score"])
         return newEnemy
+    
 class Row:
     def __init__(self,rooms):
         self.rooms=rooms
@@ -261,13 +267,13 @@ class Row:
         self.rooms[roomToChange]=newData
 
     def visualiseRow(self):
+        #prints the row of rooms out
         for x in range(0,len(self.rooms[0].drawOptions)):
             for y in range(0,len(self.rooms)):
                 if y == len(self.rooms)-1:
                     self.rooms[y].printPart(x,True)
                 else:
                     self.rooms[y].printPart(x,False)
-
 
 class BuildFloorInterface:
     def __init__(self,x,y,rooms,tier,seed=None):
@@ -281,7 +287,6 @@ class BuildFloorInterface:
         self.maxRooms=rooms
         self.directions=[[0,-1],[0,1],[1,0],[-1,0]]
         self.floorPlan=self.__createPathStartToBoss()
-        self.printMap()
 
     def getLevel(self):
         return self.floorPlan
@@ -302,7 +307,6 @@ class BuildFloorInterface:
                 p=0 
                 if x == 0 and y == 0:
                     name = "Start"
-                    # TODO: Drive Connections?
                     s=1
                     e=1
                     p=1
@@ -310,9 +314,6 @@ class BuildFloorInterface:
                 blueprint.append(room)
             plan.append(Row(blueprint))
         output=Level(plan)
-        #startRoom=Room(0,0,0,0,1,"Cafe")
-        #output.rows[2].changeRoom(0,startRoom)
-        #Use cafe later for health pickups?
         return output
 
     def __updateConnections(self,level):
@@ -418,7 +419,6 @@ class BuildFloorInterface:
                     finished = False
                 attempts += 1
                 if attempts > 3:
-                    print("Path failed")
                     return False
                 move=self.__getMove()
             return valid
@@ -437,7 +437,6 @@ class BuildFloorInterface:
             currentRoom=level.getStart()
             roomCount=0
             saved=0
-            print("Creating path...")
             while roomCount < self.maxRooms:
                 possible=False
                 tryPlaceRoom=0
@@ -462,19 +461,13 @@ class BuildFloorInterface:
                 successful=self.__checkPathToBoss(level)
             except:
                 successful=False
-            print(f"attempts = {attempts}")
-            print(f"room count = {roomCount}")
             if attempts > 100:
                 print("couldn't build map successfully :(")
                 input()
                 exit()
-        print("Placing treasure...")
         level=self.__placeTreasureRoom(level)
-        print("Updating connections...")
         level=self.__updateConnections(level)
-        print("Generating Bits")
         level=self.__generateBits(level)
-        print("Returning...")
         level.setTier(self.tier)
         return level
 
@@ -490,8 +483,3 @@ class BuildFloorInterface:
                     placed = True
                 except:
                     placed = False
-                        
-    def printMap(self):
-        #outputs the visual map of a level
-        for x in range(0,len(self.floorPlan.rows)):
-            print(self.floorPlan.rows[x].debugGetContentsAsList())
