@@ -3,7 +3,7 @@ Created by Lye.D for AQA A-Level computer science
 How to start:
 
 ```
-Run --------.py
+Run mainGame.py
 ```
 
 ## To Build for Distribution:
